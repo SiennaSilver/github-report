@@ -1,0 +1,61 @@
+#
+# Reports how many commits fork behind master  (all repos)
+#
+
+
+environment:
+  GIT_SCRIPT: SiennaSilver
+
+
+  GIT_USER1: AzureWinter
+  GIT_USER2: TealHazel
+  GIT_USER3: PearlNeon
+  GIT_USER4: 
+
+
+
+build_script:
+
+  - ps: |
+
+      if (${env:GIT_SCRIPT} -Eq $Null) {
+        $env:GIT_SCRIPT = $env:APPVEYOR_REPO_COMMIT_AUTHOR
+      }
+
+
+      if (${env:GIT_USER1} -Eq $Null) {
+        $env:GIT_USER1 = $env:APPVEYOR_REPO_COMMIT_AUTHOR
+      }
+
+
+
+      ##################################
+
+
+
+      try {
+        iex ((New-Object System.Net.WebClient).DownloadString("https://github.com/${env:GIT_SCRIPT}/appveyor-ci/raw/main/script/script.ps1"))
+
+
+
+        $lcv = 1
+
+        while (1) {
+          $env:GIT_USER = iex ("$" + "env:GIT_USER" + $lcv)
+
+          if ($env:GIT_USER -Eq $Null) {
+            break
+          }
+
+          $lcv += 1
+
+
+
+          iex ((New-Object System.Net.WebClient).DownloadString("${env:GIT_SCRIPT}/report/report.ps1"))
+        }
+      }
+
+
+      catch {
+        throw "$_"
+      }
